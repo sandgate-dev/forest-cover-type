@@ -1,6 +1,10 @@
 
 # Project - Forest Cover Type
 
+The original text can be found on my [blog](https://stephanosterburg.github.io/stephanosterburg.github.io/forest/)
+
+### Introduction
+
 Researchers at the Department of Forest Sciences at Colorado State University collected over half a million measurements from tree observations from four areas of the Roosevelt National Forest in Colorado. All observations are cartographic variables (no remote sensing) from 30-meter x 30-meter sections of forest.
 
 The resulting dataset includes information on tree type, shadow coverage, distance to nearby landmarks (roads etcetera), soil type, and local topography. In total there are 55 columns/features.
