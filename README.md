@@ -1,105 +1,200 @@
 
-# Module 3 Final Project
+# Project - Forest Cover Type
+
+Researchers at the Department of Forest Sciences at Colorado State University collected over half a million measurements from tree observations from four areas of the Roosevelt National Forest in Colorado. All observations are cartographic variables (no remote sensing) from 30-meter x 30-meter sections of forest.
+
+The resulting dataset includes information on tree type, shadow coverage, distance to nearby landmarks (roads etcetera), soil type, and local topography. In total there are 55 columns/features.
+
+### Problem
+
+Can we build a model that predicts what types of trees grow in an area based on the surrounding characteristics? Like elevation, slope, distance, soil type etcetera.
+
+### Dataset
+
+The dataset has 55 columns in total where `Wilderness_Area` consists of 4 dummy variables and `Soil_Tpye` consists of 40 dummy variables.
+
+Continuous Data
+* `Elevation` (in meters)
+* `Aspect` (in degrees azimuth[^2])
+* `Slope` (in degrees)
+* `Horizontal_Distance_To_Hydrology` (Horizontal distance to nearest surface water features in meters)
+* `Horizontal_Distance_To_Roadways` (Horizontal distance to nearest roadway in meters)
+* `Horizontal_Distance_To_Fire_Points` (Horizontal distance to nearest wildfire ignition points in meters)
+* `Vertical_Distance_To_Hydrology` (Vertical distance to nearest surface water features in meters)
+* `Hillshade_9am` (Hill shade index at 9am, summer solstice. Value out of 255)
+* `Hillshade_Noon` (Hill shade index at noon, summer solstice. Value out of 255)
+* `Hillshade_3pm` (Hill shade index at 3pm, summer solstice. Value out of 255)
 
 
-## Introduction
-
-In this lesson, we'll review all the guidelines and specifications for the final project for Module 3.
+[^2]: <https://en.wikipedia.org/wiki/Azimuth>
 
 
-## Objectives
+Categorical Data
+* `Wilderness Area` (4 dummy variable binary columns, 0 = absence or 1 = presence)
+* `Soil Type` (40 dummy variable binary columns, 0 = absence or 1 = presence)
 
-* Understand all required aspects of the Final Project for Module 3
-* Understand all required deliverables
-* Understand what constitutes a successful project
+The target variable `Cover_Type` is defined as an integer value between `1` and `7`, with the following key:
 
-## Final Project Summary
+1. Spruce/Fir.       
+2. Lodgepole Pine.   
+3. Ponderosa Pine.   
+4. Cottonwood/Willow
+5. Aspen             
+6. Douglas-fir       
+7. Krummholz         
 
-Congratulations! You've made it through another _intense_ module, and now you're ready to show off your newfound Machine Learning skills!
+### Approach
 
-<img src='smart.gif'>
+#### EDA
 
-All that remains for Module 3 is to complete the final project!
+The first step with every dataset is to do an `Exploratory Data Analysis` (EDA). What kind of data do we have? Text or numerical (continues or categorical)? Do we have missing data, or just merely wrong data — values which do not make any sense in the given context, i.e., 9999.
 
-## The Project
+Because of the sheer number of soil types and wilderness areas I had a look at them first. Luckily, the researchers here were efficient in the sense that they document everything meticulously. Everything we need to know with a detailed description can be found online[^3].
 
-For this project, you're going to select a dataset of your choosing and create a classification model. You'll start by indentifying a problem you can solve with classification, and then identify a dataset. You'll then use everything you've learned about Data Science and Machine Learning thus far to source a dataset, preprocess and explore it, and then build and interpret a classification model that answers your chosen question. 
+[^3]: <https://archive.ics.uci.edu/ml/machine-learning-databases/covtype/covtype.info>
 
+From that document, we can find out that
+>    This study area includes four wilderness areas located in the
+>    Roosevelt National Forest of northern Colorado.  These areas
+>    represent forests with minimal human-caused disturbances,
+>    so that existing forest cover types are more a result of
+>    ecological processes rather than forest management practices.
 
-### Selecting a Data Set
+Not that this is of any importance for our data exploration or to make a prediction, but I found it interesting to read. Because it makes you think about what kind of implications your result can potentially have.
 
-We encourage you to be very thoughful when identifying your problem and selecting your data set--an overscoped project goal or a poor data set can quickly bring an otherwise promising project to a grinding halt. 
+However, what we want to find out is how the data is distributed by `Cover_Type`. Here I created a `seaborn.countplot`.
 
-To help you select an appropriate data set for this project, we've set some guidelines:
+```python
+tmpList = []
+for c in soil_df.columns:
+    tmpList += [str(c)] * soil_df[c].value_counts()[1]
 
-1. Your dataset should work for classification. The classification task can be either binary or multi-categorical, as long as it's a classification model.   
+se = pd.Series(tmpList)
+df['Soil_Types'] = se.values
 
-2. Your dataset needs to be of sufficient complexity. Try to avoid picking an overly simple dataset. We want to see all the steps of the Data Science Process in this project--it's okay if the dataset is mostly clean, but we expect to see some preprocessing and exploration. See the following section, **_Data Set Constraints_**, for more information on this.   
+plt.figure(figsize=(16, 8))
+sns.countplot(data=df, x='Soil_Types', hue='Cover_Type')
+plt.title('Number of Observation by Cover Type')
+plt.xticks(rotation=90)
+plt.show();
+```
 
-3. On the other end of the spectrum, don't pick a problem that's too complex, either. Stick to problems that you have a clear idea of how you can use machine learning to solve it. For now, we recommend you stay away from overly complex problems in the domains of Natural Language Processing or Computer Vision--although those domains make use of Supervised Learning, they come with a lot of other special requirements and techniques that you don't know yet (but you'll learn soon!). If you're chosen problem feels like you've overscoped, then it probably is. If you aren't sure if your problem scope is appropriate, double check with your instructor!  
+<img src='images/SoilType.png'>
 
-4. **_Serious Bonus Points_** if some or all of the data is data you have to source yourself through web scraping or interacting with a 3rd party API! Having projects that show off your ability to source data effectively make you look that much more impressive when showing your work off to potential employers!
+Looking more closely at the data we can find that the top 5 soil types count for more than 50% of the measurements in the collected data.
 
-### Data Set Constraints
+Unlike categorical data, the continues data is even more interesting to investigate. The questions we want to find answers for are
 
-When selecting a data set, be sure to take into the consideration the following constraints:
-
-1. Your data set can't be one we've already worked with in any labs. 
-2. Your data set should contain a minimum of 1000 rows.    
-3. Your data set should contain a minimum of 10 predictor columns, before any one-hot encoding is performed.   
-4. Your instructor must provide final approval on your data set. 
-
-### Problem First, or Data First?
-
-There are two ways that you can about getting started: **_Problem-First_** or **_Data-First_**. 
-
-**_Problem-First_**: Start with a problem that you want to solve with classification, and then try to find the data you need to solve it.  If you can't find any data to solve your problem, then you should pick another problem. 
-
-**_Data-First_**: Take a look at some of the most popular internet respositories of cool data sets we've listed below. If yuou find a data set that's particularly interesting for you, then it's totally okay to build your problem around that data set. 
-
-There are plenty of amazing places that you can get your data from. We recommend you start looking at data sets in some of these resources first:
-
-* [UCI Machine Learning Datasets Repository](https://archive.ics.uci.edu/ml/datasets.html)
-* [Kaggle Datasets](https://www.kaggle.com/datasets)
-* [Awesome Datasets Repo on Github](https://github.com/awesomedata/awesome-public-datasets)
-* [New York City Open Data Portal](https://opendata.cityofnewyork.us/)
-* [Inside AirBNB ](http://insideairbnb.com/)
-
-
-## The Deliverables
-
-Your completed should contain the following deliverables:
-
-1. A **_Jupyter Notebook_** containing any code you've written for this project.  
-
-2. A **_Blog Post_** explaining your problem/dataset, along with your process, methodology, and findings.  
-
-3. An **_"Executive Summary" PowerPoint Presentation_** that gives a brief overview of your problem/dataset, and each step of the OSEMN process. 
+* Do we need to scale/normalise the continuous data?
+* What about skewness/kurtosis?
+* Does it matter if the data is in meter, degree or index?
 
 
-
-### Jupyter Notebook Must-Haves
-
-For this project, your jupyter notebook should meet the following specifications:
-
-**_Organization/Code Cleanliness_**
-
-* The notebook should be well organized, easy to follow, and code is commented where appropriate.  
-    * Level Up: The notebook contains well-formatted, professional looking markdown cells explaining any substantial code. All functions have docstrings that act as professional-quality documentation.  
-* The notebook is written to technical audiences with a way to both understand your approach and reproduce your results. The target audience for this deliverable is other data scientists looking to validate your findings.  
-
-**_Process, Methodology, and Findings_**
-
-* Your notebook should contain a clear record of your process and methodology for exploring and preprocessing your data, building and tuning a model, and interpreting your results. 
-* We recommend you use the OSEMN process to help organize your thoughts and stay on track. 
+<img src='images/ContinuesData.png'>
 
 
-### Blog Post Must-Haves
+### Feature Selection
 
-Your blog post should clearly explain your process and results, including:
-*  An explanation of the problem you're trying to solve and the dataset you choose for it
-* Well documented examples of code and visualizations (when appropriate)
+There are several ways to explore what features we need to keep around to make our prediction. The labour intensive workflow and the much quicker workflow - what I would like to call the "blindfolded method". For the purpose of gaining more inside, I choose to do both.
+
+In the first workflow, I used several classifiers from the `sklearn.ensemble` Library. These are, `AdaBoostClassifier`,  `RandomForestClassifier`, `GradientBoostingClassifier` and `ExtraTreeClassifier`. All these classifiers have one thing in common, which is the attribute `feature_importances_`, which returns the feature importance (the higher the value, the more important the feature).
+
+```python
+# Create an empty dataframe to hold our findings for feature_importances_
+ranking_df = pd.DataFrame()
+
+RFC_model = RandomForestClassifier(random_state=0, n_jobs=-1)
+RFC_model.fit(X, y)
+
+importances = RFC_model.feature_importances_
+indices = np.argsort(importances)[::-1]
+
+# Get feature name
+rfc_list = [X.columns[indices[f]] for f in range(X.shape[1])]
+ranking_df['RFC'] = rfc_list
+
+# Get feature importance
+rfci_list = [importances[indices[f]] for f in range(X.shape[1])]
+ranking_df['RFC importance'] = rfci_list
+```
+
+The result was a pandas data frame with all features from the dataset in order of importance, which allows us to pick the best features. Interestingly, `RandomForestClassifier` and `ExtraTreeClassifier` had the most similar results. Other findings from that list were,
+
+* `Gradian Boosting` shows similar names just in a different order compared to `Random Forest` and `Extra Tree`.
+* `AdaBoost` on the other hand shows an exciting and unique result. The top 8 features alone are enough to make a good class prediction. Compared to all the other classifiers, here we have `Wilderness_Area4` on above `Elevation` in the list.
+* `Elevation` dominates in all classifiers with a range of `18-25%`, up to `65%` in `GBC`.
+* `Hillshade` features are seen in the top 20 in 3 out of 4 classifiers. `Random Forest` and `Extra Tree Classifier` show `Hillshade` features having similar ranges.
+* `Horizontal_Distance_To_Hydrology` and `Vertical_Distance_To_Hydrology` are in all classifiers in the top 10.
+* `Horizontal_Distance_To_Roadways` and `Horizontal_Distance_To_Fire_Points` are represented at the top 3 out of 4 classifiers.
+* `Aspect` and `Slope` also show up in the top 20 across all classifiers, with the exception of Gradian Boosting Slope which isn't in the top 20.
+* In regards to `Soil_Type`, it is hard to find some commonality. Here I choose to select: `Soil_Type2`, `Soil_Type4`, `Soil_Type10`, `Soil_Type22`, `Soil_Type23` and `Soil_Type39`.
+
+The question I asked myself at this point is, was the time wisely spend? After all, it took almost 20 minutes to calculate. One advantage this approach has is, we know our selected features.
+
+The other approach we can choose is using `PCA` (Principal Component Analysis) from sklearn.
+
+```python
+y = df['Cover_Type']
+X = df.drop('Cover_Type', axis=1)
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+pca = PCA(n_components=20)
+X_pca = pca.fit_transform(X_scaled)
+```
+
+The big advantage to this is the short processing time. However, the drawback, we are losing any knowledge regarding our features. Is that important? Possibly.
+
+As you can see in the code snippet above, I opted to scale the features. Researching that topic, I found that there is a multitude of approaches, some use a combination of `StandardScaler`, `MinMaxScaler` and `Normalizer` method and others just picked one of the methods for scaling, centring, normalisation, binarisation and imputation the `sklearn.preprocessing` module. Some just scale only the continuous features and not the categorical, etcetera. The list of possibilities goes on. For now, I just used the most straightforward way.
 
 
-**_NOTE:_**  This blog post is your way of showcasing the work you've done on this project--chances are it will soon be read by a recruiter or hiring manager! Take the time to make sure that you craft your story well, and clearly explain your process and findings in a way that clearly shows both your technical expertise **_and_** your ability to communicate your results!
+### Evaluate Model
 
+
+By hand selecting our features, we get an `accuracy of 92.23%` and an `f1_score of 86.74%` using cross validation. In contrast, `PCA` has an `accuracy of 90.72%` and an `f1_score of 84.44%`. Is that a big enough difference to justify the time spent to find our features? Maybe.
+
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(X_pca, y, random_state=0)
+
+clf = KNeighborsClassifier(weights='distance', n_jobs=-1)
+clf.fit(X_train, y_train)
+
+accuracy = cross_val_score(clf, X_train, y_train, cv = 10, scoring = 'accuracy', n_jobs=-1)
+f1_score = cross_val_score(clf, X_train, y_train, cv = 10, scoring = 'f1_macro', n_jobs=-1)
+
+# predict
+predict = clf.predict(X_test)
+
+# calculating accuracy
+accuracy = accuracy_score(y_test, predict)
+
+print('KNeighbors Classifier model')
+print('Accuracy: {:.2f}%'.format(accuracy * 100))
+
+knn_classification_report = classification_report(y_test, predict)
+print(knn_classification_report)
+```
+
+
+<img src='images/CrossValidation.png'>
+
+
+To test how accurate we can predict the `Cover_Type` I used the `KNeighborsClassifier` from sklearn, and we got an accuracy of `91.02%`. That is great.
+
+
+## Conclusion
+
+**Yes**, we can build a model that predicts what types of trees grow in an area based on the surrounding characteristics.
+
+
+## Final Thought
+
+We can use sklearn's `GridSearchCV` to find our features (exhaustive search over specified parameter values for an estimator). Moreover, we should make use of sklearn's `Pipeline` functionality to write clean and manageable code.
+
+
+One last question, could we use clustering to make our prediction?
+
+
+##### Footnotes
