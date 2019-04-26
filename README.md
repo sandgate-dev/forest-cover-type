@@ -1,7 +1,7 @@
 
 # Project - Forest Cover Type
 
-The original text can be found on my [blog](https://stephanosterburg.github.io/stephanosterburg.github.io/forest/)
+The original text can be found on my [blog](https://data-ocean.github.io/forest/)
 
 ### Introduction
 
