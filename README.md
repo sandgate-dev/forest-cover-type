@@ -1,3 +1,5 @@
+<a href="https://www.python.org/dev/peps/"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - Python Style Guide"></a>
+
 
 # Project - Forest Cover Type
 
@@ -201,4 +203,8 @@ We can use sklearn's `GridSearchCV` to find our features (exhaustive search over
 One last question, could we use clustering to make our prediction?
 
 
-##### Footnotes
+
+---
+
+License MIT © [Stephan Osterburg](https://stephanosterburg.github.io)
+
