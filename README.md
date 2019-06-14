@@ -1,11 +1,13 @@
-<a href="https://www.python.org/dev/peps/"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - Python Style Guide"></a>
+<p align="center">
+    <a href="https://www.python.org/dev/peps/"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - Python Style Guide"></a>
+</p>
 
 
 <center><img src='images/TreeCollage.jpg'></center>
 
 # Project - Forest Cover Type
 
-The original text can be found on my [blog](https://stephanosterburg.github.io/forest/)
+Read a more in detail at my [blog](https://stephanosterburg.github.io/forest/).
 
 ### Motivation
 
